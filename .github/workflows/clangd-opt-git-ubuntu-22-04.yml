@@ -1,0 +1,71 @@
+name: clangd-opt-git-ubuntu-22-04
+
+on: [push]
+
+env:
+  CLICOLOR_FORCE: 1
+
+jobs:
+  clangd:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: ninja
+      run: |
+        wget https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
+        unzip ninja-linux.zip
+        sudo mv ninja /usr/bin/ninja
+        sudo chown root:root /usr/bin/ninja
+        rm ninja-linux.zip
+    - name: llvm
+      run: |
+        echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main" | sudo tee /etc/apt/sources.list.d/llvm.list
+        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+        sudo apt-get update
+        sudo apt-get install clang-18
+    - name: checkout
+      run: |
+        git clone --depth 1 --branch main https://github.com/llvm/llvm-project.git
+        git clone https://aur.archlinux.org/clangd-opt-git.git
+    - name: patch
+      run: |
+        cd llvm-project
+        patch -p1 -i ../clangd-opt-git/hover-doxygen-trunk.patch
+        patch -p1 -i ../clangd-opt-git/doxygen-extra-render-trunk.patch
+        patch -p1 -i ../clangd-opt-git/doxygen-more-fields.patch
+        patch -p1 -i ../clangd-opt-git/hover-resolve-forward-params.patch
+        patch -p1 -i ../clangd-opt-git/hover-bit-fields-mask.patch
+        patch -p1 -i ../clangd-opt-git/hover-hex-formats.patch
+        patch -p1 -i ../clangd-opt-git/hover-no-defs.patch
+        patch -p1 -i ../clangd-opt-git/hover-record-paddings.patch
+        patch -p1 -i ../clangd-opt-git/lsp-preprocessor-folding.patch
+        patch -p1 -i ../clangd-opt-git/postfix-completion-trunk.patch
+        patch -p1 -i ../clangd-opt-git/refactor-extract-function.patch
+        patch -p1 -i ../clangd-opt-git/inlay-hints-paddings.patch
+        patch -p1 -i ../clangd-opt-git/inlay-hints-blockend-linelimit10.patch
+        patch -p1 -i ../clangd-opt-git/resolve-depend-type.patch
+        cd ..
+    - name: build
+      run: |
+        mkdir build
+        cd build
+        cmake -B . -S ../llvm-project/llvm -G Ninja -DCMAKE_C_COMPILER=clang-18 -DCMAKE_CXX_COMPILER=clang++-18 -DCMAKE_INSTALL_PREFIX=/opt/clangd-opt-git -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
+        cmake --build . --target clangd
+        llvm-strip-18 --strip-all bin/clangd
+        cd ..
+        rm -rf clangd-opt-git
+        mkdir clangd-opt-git
+        cd clangd-opt-git
+        mkdir bin
+        cp ../build/bin/clangd ./bin/
+        mkdir lib
+        cd lib
+        cp --recursive ../../build/lib/clang ./
+        cd ..
+        cd ..
+    - name: publish
+      uses: actions/upload-artifact@v4
+      with:
+        name: clangd-opt-git
+        if-no-files-found: error
+        path: clangd-opt-git
