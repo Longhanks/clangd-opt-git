@@ -1,0 +1,61 @@
+name: clangd-opt-git-win
+
+on: [push]
+
+env:
+  CLICOLOR_FORCE: 1
+
+jobs:
+  clangd:
+    runs-on: windows-latest
+
+    steps:
+    - name: checkout
+      run: |
+        git clone --depth 1 --branch main https://github.com/llvm/llvm-project.git
+        git clone https://aur.archlinux.org/clangd-opt-git.git
+    - name: patch
+      run: |
+        cd llvm-project
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/hover-doxygen-trunk.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/doxygen-extra-render-trunk.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/doxygen-more-fields.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/hover-resolve-forward-params.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/hover-bit-fields-mask.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/hover-hex-formats.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/hover-no-defs.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/hover-record-paddings.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/lsp-preprocessor-folding.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/postfix-completion-trunk.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/refactor-extract-function.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/inlay-hints-paddings.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/inlay-hints-blockend-linelimit10.patch
+        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/resolve-depend-type.patch
+        cd ..
+      shell: cmd
+    - name: build
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=x64 -host_arch=x64
+        mkdir build
+        cd build
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -B . -S ../llvm-project/llvm -G Ninja -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" --build . --target clangd
+        llvm-strip --strip-all bin/clangd.exe
+        cd ..
+        rmdir /S /Q clangd-opt-git
+        mkdir clangd-opt-git
+        cd clangd-opt-git
+        mkdir bin
+        copy ..\build\bin\clangd.exe .\bin\
+        mkdir lib
+        cd lib
+        xcopy /e /i ..\..\build\lib\clang .\clang
+        cd ..
+        cd ..
+      shell: cmd
+    - name: publish
+      uses: actions/upload-artifact@v4
+      with:
+        name: clangd-opt-git
+        if-no-files-found: error
+        path: clangd-opt-git
