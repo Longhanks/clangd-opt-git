@@ -12,8 +12,11 @@ jobs:
     steps:
     - name: checkout
       run: |
-        git clone --depth 1 --branch main https://github.com/llvm/llvm-project.git
+        git clone --depth 1 --branch llvmorg-20.1.0-rc3 https://github.com/llvm/llvm-project.git
         git clone https://aur.archlinux.org/clangd-opt-git.git
+        cd clangd-opt-git
+        git checkout 7c4a916467740257887a95b4c55069486d6722a1
+        cd ..
     - name: patch
       run: |
         cd llvm-project
@@ -30,7 +33,6 @@ jobs:
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/refactor-extract-function.patch
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/inlay-hints-paddings.patch
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/inlay-hints-blockend-linelimit10.patch
-        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/resolve-depend-type.patch
         cd ..
       shell: cmd
     - name: build

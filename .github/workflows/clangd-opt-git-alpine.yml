@@ -1,4 +1,4 @@
-name: clangd-opt-git-ubuntu-20-04
+name: clangd-opt-git-alpine
 
 on: [push, workflow_dispatch]
 
@@ -7,26 +7,37 @@ env:
 
 jobs:
   clangd:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
-    - name: ninja
-      run: |
-        wget https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
-        unzip ninja-linux.zip
-        sudo mv ninja /usr/bin/ninja
-        sudo chown root:root /usr/bin/ninja
-        rm ninja-linux.zip
-    - name: llvm
-      run: |
-        echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-19 main" | sudo tee /etc/apt/sources.list.d/llvm.list
-        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-        sudo apt-get update
-        sudo apt-get install clang-19
+    - name: Setup Alpine Linux
+      uses: jirutka/setup-alpine@v1
+      with:
+        branch: latest-stable
+        packages: >
+          clang19
+          clang19-extra-tools
+          compiler-rt
+          cmake
+          git
+          libc++-dev
+          libc++-static
+          llvm19
+          llvm-libunwind-static
+          mold
+          musl-dev
+          patch
+          ninja-build
+          ninja-is-really-ninja
+          python3
     - name: checkout
       run: |
-        git clone --depth 1 --branch main https://github.com/llvm/llvm-project.git
+        git clone --depth 1 --branch llvmorg-20.1.0-rc3 https://github.com/llvm/llvm-project.git
         git clone https://aur.archlinux.org/clangd-opt-git.git
+        cd clangd-opt-git
+        git checkout 7c4a916467740257887a95b4c55069486d6722a1
+        cd ..
+      shell: alpine.sh {0}
     - name: patch
       run: |
         cd llvm-project
@@ -43,15 +54,15 @@ jobs:
         patch -p1 -i ../clangd-opt-git/refactor-extract-function.patch
         patch -p1 -i ../clangd-opt-git/inlay-hints-paddings.patch
         patch -p1 -i ../clangd-opt-git/inlay-hints-blockend-linelimit10.patch
-        patch -p1 -i ../clangd-opt-git/resolve-depend-type.patch
         cd ..
+      shell: alpine.sh {0}
     - name: build
       run: |
         mkdir build
         cd build
-        cmake -B . -S ../llvm-project/llvm -G Ninja -DCMAKE_C_COMPILER=clang-19 -DCMAKE_CXX_COMPILER=clang++-19 -DCMAKE_INSTALL_PREFIX=/opt/clangd-opt-git -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
+        cmake -B . -S ../llvm-project/llvm -G Ninja -DCMAKE_C_COMPILER=clang-19 -DCMAKE_CXX_COMPILER=clang++-19 -DCMAKE_INSTALL_PREFIX=/opt/clangd-opt-git -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" -DLLVM_HOST_TRIPLE="x86_64-alpine-linux-musl" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-alpine-linux-musl" -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold -stdlib=libc++ -rtlib=compiler-rt -static -lc++abi -lunwind" -DCMAKE_CXX_FLAGS="-stdlib=libc++"
         cmake --build . --target clangd
-        llvm-strip-19 --strip-all bin/clangd
+        llvm-strip --strip-all bin/clangd
         cd ..
         rm -rf clangd-opt-git
         mkdir clangd-opt-git
@@ -63,6 +74,7 @@ jobs:
         cp --recursive ../../build/lib/clang ./
         cd ..
         cd ..
+      shell: alpine.sh {0}
     - name: publish
       uses: actions/upload-artifact@v4
       with:
