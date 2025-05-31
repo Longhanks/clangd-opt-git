@@ -15,7 +15,7 @@ jobs:
         git clone --depth 1 --branch llvmorg-20.1.6 https://github.com/llvm/llvm-project.git
         git clone https://aur.archlinux.org/clangd-opt-git.git
         cd clangd-opt-git
-        git checkout 7c4a916467740257887a95b4c55069486d6722a1
+        git checkout 0bfe963755230e758d7d9bb23e99b5831a0c8846
         cd ..
     - name: patch
       run: |
@@ -32,7 +32,6 @@ jobs:
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/postfix-completion-trunk.patch
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/refactor-extract-function.patch
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/inlay-hints-paddings.patch
-        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/inlay-hints-blockend-linelimit10.patch
         cd ..
       shell: cmd
     - name: build
