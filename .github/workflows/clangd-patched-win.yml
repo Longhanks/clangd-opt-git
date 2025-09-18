@@ -13,7 +13,7 @@ jobs:
     - name: checkout
       run: |
         git clone --depth 1 --branch llvmorg-21.1.1 https://github.com/llvm/llvm-project.git
-        git clone --revision=0bfe963755230e758d7d9bb23e99b5831a0c8846 https://aur.archlinux.org/clangd-opt-git.git
+        git clone --revision=0bfe963755230e758d7d9bb23e99b5831a0c8846 https://github.com/archlinux/aur clangd-opt-git
         cd clangd-opt-git
         git checkout 0bfe963755230e758d7d9bb23e99b5831a0c8846
         cd ..
