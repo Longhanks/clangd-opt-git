@@ -61,7 +61,7 @@ jobs:
         cd build
         cmake -B . -S ../llvm-project/llvm -G Ninja -DCMAKE_C_COMPILER=clang-21 -DCMAKE_CXX_COMPILER=clang++-21 -DCMAKE_INSTALL_PREFIX=/opt/clangd-opt-git -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" -DLLVM_HOST_TRIPLE="x86_64-alpine-linux-musl" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-alpine-linux-musl" -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold -stdlib=libc++ -rtlib=compiler-rt -static -lc++abi -lunwind" -DCMAKE_CXX_FLAGS="-stdlib=libc++"
         cmake --build . --target clangd
-        llvm-strip --strip-all bin/clangd
+        llvm21-strip --strip-all bin/clangd
         cd ..
         rm -rf clangd-opt-git
         mkdir clangd-opt-git
