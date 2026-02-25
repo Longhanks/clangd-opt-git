@@ -32,27 +32,22 @@ jobs:
           python3
     - name: checkout
       run: |
-        git clone --depth 1 --branch llvmorg-21.1.8 https://github.com/llvm/llvm-project.git
-        git clone --revision=0bfe963755230e758d7d9bb23e99b5831a0c8846 https://github.com/archlinux/aur clangd-opt-git
+        git clone --depth 1 --branch llvmorg-22.1.0 https://github.com/llvm/llvm-project.git
+        git clone --revision=f412ca7f9bd717cf9a5468c70d1782b2b7c2f1b4 https://github.com/archlinux/aur clangd-opt-git
         cd clangd-opt-git
-        git checkout 0bfe963755230e758d7d9bb23e99b5831a0c8846
+        git checkout f412ca7f9bd717cf9a5468c70d1782b2b7c2f1b4
         cd ..
       shell: alpine.sh {0}
     - name: patch
       run: |
         cd llvm-project
-        patch -p1 -i ../clangd-opt-git/hover-doxygen-trunk.patch
-        patch -p1 -i ../clangd-opt-git/doxygen-extra-render-trunk.patch
-        patch -p1 -i ../clangd-opt-git/doxygen-more-fields.patch
-        patch -p1 -i ../clangd-opt-git/hover-resolve-forward-params.patch
         patch -p1 -i ../clangd-opt-git/hover-bit-fields-mask.patch
         patch -p1 -i ../clangd-opt-git/hover-hex-formats.patch
         patch -p1 -i ../clangd-opt-git/hover-no-defs.patch
-        patch -p1 -i ../clangd-opt-git/hover-record-paddings.patch
-        patch -p1 -i ../clangd-opt-git/lsp-preprocessor-folding.patch
+        patch -p1 -i ../clangd-opt-git/hover-resolve-forward-params.patch
+        patch -p1 -i ../clangd-opt-git/inlay-hints-paddings.patch
         patch -p1 -i ../clangd-opt-git/postfix-completion-trunk.patch
         patch -p1 -i ../clangd-opt-git/refactor-extract-function.patch
-        patch -p1 -i ../clangd-opt-git/inlay-hints-paddings.patch
         cd ..
       shell: alpine.sh {0}
     - name: build
