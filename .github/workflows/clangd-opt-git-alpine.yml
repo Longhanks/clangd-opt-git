@@ -32,7 +32,7 @@ jobs:
           python3
     - name: checkout
       run: |
-        git clone --depth 1 --branch llvmorg-22.1.3 https://github.com/llvm/llvm-project.git
+        git clone --depth 1 --branch llvmorg-22.1.5 https://github.com/llvm/llvm-project.git
         git clone --revision=f412ca7f9bd717cf9a5468c70d1782b2b7c2f1b4 https://github.com/archlinux/aur clangd-opt-git
         cd clangd-opt-git
         git checkout f412ca7f9bd717cf9a5468c70d1782b2b7c2f1b4
