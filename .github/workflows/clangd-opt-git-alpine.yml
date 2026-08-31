@@ -15,14 +15,14 @@ jobs:
       with:
         branch: latest-stable
         packages: >
-          clang21
-          clang21-extra-tools
+          clang
+          clang-extra-tools
           compiler-rt
           cmake
           git
           libc++-dev
           libc++-static
-          llvm21
+          llvm
           llvm-libunwind-static
           mold
           musl-dev
@@ -32,7 +32,7 @@ jobs:
           python3
     - name: checkout
       run: |
-        git clone --depth 1 --branch llvmorg-22.1.5 https://github.com/llvm/llvm-project.git
+        git clone --depth 1 --branch llvmorg-23.1.0 https://github.com/llvm/llvm-project.git
         git clone --revision=f412ca7f9bd717cf9a5468c70d1782b2b7c2f1b4 https://github.com/archlinux/aur clangd-opt-git
         cd clangd-opt-git
         git checkout f412ca7f9bd717cf9a5468c70d1782b2b7c2f1b4
@@ -54,9 +54,9 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake -B . -S ../llvm-project/llvm -G Ninja -DCMAKE_C_COMPILER=clang-21 -DCMAKE_CXX_COMPILER=clang++-21 -DCMAKE_INSTALL_PREFIX=/opt/clangd-opt-git -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" -DLLVM_HOST_TRIPLE="x86_64-alpine-linux-musl" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-alpine-linux-musl" -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold -stdlib=libc++ -rtlib=compiler-rt -static -lc++abi -lunwind" -DCMAKE_CXX_FLAGS="-stdlib=libc++"
+        cmake -B . -S ../llvm-project/llvm -G Ninja -DCMAKE_C_COMPILER=clang-22 -DCMAKE_CXX_COMPILER=clang++-22 -DCMAKE_INSTALL_PREFIX=/opt/clangd-opt-git -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" -DLLVM_HOST_TRIPLE="x86_64-alpine-linux-musl" -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-alpine-linux-musl" -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold -stdlib=libc++ -rtlib=compiler-rt -static -lc++abi -lunwind" -DCMAKE_CXX_FLAGS="-stdlib=libc++"
         cmake --build . --target clangd
-        llvm21-strip --strip-all bin/clangd
+        llvm-strip --strip-all bin/clangd
         cd ..
         rm -rf clangd-opt-git
         mkdir clangd-opt-git
