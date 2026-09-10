@@ -46,7 +46,6 @@ jobs:
         patch -p1 -i ../clangd-opt-git/hover-no-defs.patch
         patch -p1 -i ../clangd-opt-git/hover-resolve-forward-params.patch
         patch -p1 -i ../clangd-opt-git/inlay-hints-paddings.patch
-        patch -p1 -i ../clangd-opt-git/postfix-completion-trunk.patch
         patch -p1 -i ../clangd-opt-git/refactor-extract-function.patch
         cd ..
       shell: alpine.sh {0}

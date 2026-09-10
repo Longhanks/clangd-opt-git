@@ -25,7 +25,6 @@ jobs:
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/hover-no-defs.patch
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/hover-resolve-forward-params.patch
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/inlay-hints-paddings.patch
-        "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/postfix-completion-trunk.patch
         "C:\Program Files\Git\usr\bin\patch.exe" -p1 -i ../clangd-opt-git/refactor-extract-function.patch
         cd ..
       shell: cmd
